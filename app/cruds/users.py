@@ -108,8 +108,9 @@ def reset_user_password(token: str, new_password: str, db: Session = Depends(get
 
 def get_user(email: EmailStr, db:Session=Depends(get_db)):
     
-    if query :=  db.query(models.User).filter(
-        models.User.email == email).first():
+    query =  db.query(models.User).filter(models.User.email == email).first()
+    
+    if not query:
         return {"data": query, "status": status.HTTP_201_CREATED}
         
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
