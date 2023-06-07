@@ -161,28 +161,28 @@ def delete_all_user(db:Session=  Depends(get_db)):
 
 def block_user(email: EmailStr, db:Session=Depends(get_db)):
     
-    if query :=  db.query(models.User).filter(
-        models.User.email == email):
-  
-        query.update({'is_active': False})
-        return {"data": "User blocked successfully", "status": status.HTTP_200_OK}
+    query =  db.query(models.User).filter(models.User.email == email)
+    if not query.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
+                                detail="User not found")
+        
+    query.update({'is_active': False})
+    return {"data": "User blocked successfully", "status": status.HTTP_200_OK}
 
 
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-                            detail="User not found")
 
 
 def unblock_user(email: EmailStr, db:Session=Depends(get_db)):
     
-    if query :=  db.query(models.User).filter(
-        models.User.email == email):
-  
-        query.update({'is_active': True})
-        return {"data": "User blocked successfully", "status": status.HTTP_200_OK}
+    query =  db.query(models.User).filter(models.User.email == email)
+    if not query.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
+                                detail="User not found")
+        
+    query.update({'is_active': True})
+    return {"data": "User blocked successfully", "status": status.HTTP_200_OK}
         
 
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-                            detail="User not found")
 
 
 
@@ -202,7 +202,6 @@ def login(user_credentials: OAuth2PasswordRequestForm = Depends(),
 
     if not verify(user_credentials.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid Credentials")
-
 
     # create a token
     access_token = create_access_token(data={"user_id": user.id})

@@ -21,7 +21,7 @@ def shorten_shorten_url(request:ShortenUrl, db:Session=  Depends(get_db),
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, 
                             detail="Long URL has already been mapped")
 
-    domain = "http://127.0.0.1:8080/"
+    domain = "bluecounts.com"
     short_url = generate_short_url(domain)
     
     query = models.ShortenUrl(
