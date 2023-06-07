@@ -30,8 +30,7 @@ def shorten_shorten_url(request:ShortenUrl, db:Session=  Depends(get_db),
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, 
                             detail="Custom domain already exists")
 
-    domain = "scissors-v0r0.onrender.com/"
-    short_url = generate_short_url(domain)
+    short_url = generate_short_url()
     
     query = models.ShortenUrl(
         long_url=request.long_url,
