@@ -136,15 +136,15 @@ def update_user(request: User, db:Session=Depends(get_db)):
 
 def delete_user(email: EmailStr, db:Session=Depends(get_db)):
     
-    if query :=  db.query(models.User).filter(
-        models.User.email == email).first():
-        db.delete(query)
-        db.commit()
-        
-        return {"data": "User deleted successfully", "status": status.HTTP_200_OK}
+    query =  db.query(models.User).filter(models.User.email == email).first()
+    if not query:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
+                                detail="User not found")
 
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-                            detail="User not found")
+    db.delete(query)
+    db.commit()
+    return {"data": "User deleted successfully", "status": status.HTTP_200_OK}
+
 
 def delete_all_user(db:Session=  Depends(get_db)):
     query =  db.query(models.User).all()
