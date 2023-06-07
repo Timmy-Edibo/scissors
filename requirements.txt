@@ -13,3 +13,4 @@ typing_extensions==4.5.0
 uvicorn==0.22.0
 python-dotenv==0.21.1
 passlib==1.7.4
+bcrypt==4.0.1
