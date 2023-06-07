@@ -183,9 +183,6 @@ def unblock_user(email: EmailStr, db:Session=Depends(get_db)):
     return {"data": "User blocked successfully", "status": status.HTTP_200_OK}
         
 
-
-
-
 def login(user_credentials: OAuth2PasswordRequestForm = Depends(), 
             db: Session = Depends(get_db)):
 
