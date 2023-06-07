@@ -33,7 +33,7 @@ def reset_password_link_mailer(email, token):
     message['From'] = email_sender
     message['To'] = email
     message['Subject'] = 'Chatter Reset Password Link'
-    reset_link = f"http://127.0.0.1:8000/api/v1/users/reset-password?otp={token}" 
+    reset_link = f"https://scissors-v0r0.onrender.com/api/v1/users/reset-password?otp={token}" 
 
     # Add message body
     body = f'<p>Here is your reset password link: <a href="{reset_link}">Click here</a>. It expires in 10 minutes. Neglect if this email is not triggered by you.</p>'

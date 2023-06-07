@@ -34,7 +34,7 @@ def mailer(email, otp):
     message['From'] = email_sender
     message['To'] = email
     message['Subject'] = 'Scissors User Confirmation'
-    link = f'http://127.0.0.1:8000/api/v1/users/activate-user?otp={otp}'
+    link = f'https://scissors-v0r0.onrender.com/api/v1/users/activate-user?otp={otp}'
     
 
     # Add message body
