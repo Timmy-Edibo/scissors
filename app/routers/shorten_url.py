@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends, status, HTTPException
-from app.schemas.shorten_url import ShortenUrl
+from app.schemas.shorten_url import ShortenUrl, UpdateShortenUrl
+from fastapi.responses import JSONResponse
+
 
 from app.database.db import get_db
 from sqlalchemy.orm import Session
@@ -17,11 +19,18 @@ def shorten_shorten_url(request:ShortenUrl, db:Session=  Depends(get_db),
     check_query = db.query(models.ShortenUrl).filter(
         models.ShortenUrl.long_url == request.long_url).first()
     
+    check_custom_url = db.query(models.ShortenUrl).filter(
+        models.ShortenUrl.custom_url == request.custom_url).first()
+    
     if check_query:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, 
                             detail="Long URL has already been mapped")
+        
+    if check_custom_url:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, 
+                            detail="Custom domain already exists")
 
-    domain = "bluecounts.com"
+    domain = "scissors-v0r0.onrender.com/"
     short_url = generate_short_url(domain)
     
     query = models.ShortenUrl(
@@ -30,50 +39,104 @@ def shorten_shorten_url(request:ShortenUrl, db:Session=  Depends(get_db),
         user=current_user.email,
         short_url=short_url
     )
-    # query = models.ShortenUrl(**request.dict())
     
     db.add(query)
     db.commit()
     db.refresh(query)
     return  query
 
-from fastapi.responses import RedirectResponse
 
-@shorten_url_router.get("/{short_url}")
-def redirect_url(short_url: str, db:Session=  Depends(get_db), 
-                current_user:Session=Depends(get_current_user)):
+@shorten_url_router.get("/list-all")
+def list_shorten_url(db:Session=  Depends(get_db), 
+                    current_user:Session=Depends(get_current_user)):
+    
+    query = db.query(models.ShortenUrl).all()
+    return query if len(query) > 0 else []
+
+
+
+@shorten_url_router.get("/search/{short_url}")
+def search_shorten_url(short_url: str, custom_url:str, db:Session=  Depends(get_db), 
+                    current_user:Session=Depends(get_current_user)):
     
     check_query = db.query(models.ShortenUrl).filter(
         models.ShortenUrl.short_url == short_url).first()
     
-    if not check_query:
-        raise HTTPException(status_code=404, detail="URL not found")
+    if not check_query.first():
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, 
+                            detail="URL does not exist")
     
-    return check_query
+    return check_query.first()
 
 
 
-@shorten_url_router.get("/get")
-def get_shorten_url():
-    return  "Endpoint for fetching a single shorten_url"
 
-@shorten_url_router.get("/list-all")
-def list_shorten_url():
-    return  "Endpoint for fetching all shorten_url"
+@shorten_url_router.patch("/update-custom-domain/{short_url}")
+def search_shorten_url(short_url: str, custom_url:str, db:Session=  Depends(get_db), 
+                    current_user:Session=Depends(get_current_user)):
+    
+    check_query = db.query(models.ShortenUrl).filter(
+        models.ShortenUrl.short_url == short_url)
+    
+    check_custom_url = db.query(models.ShortenUrl).filter(
+        models.ShortenUrl.custom_url == custom_url).first()
+    
+    if not check_query.first():
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, 
+                            detail="URL does not exist")
+    
+    if current_user.email != check_query.first().user:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, 
+                    detail="Unauthorized to perform this operation")
+        
+    if check_custom_url:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, 
+                            detail="Custom domain already exists")
+        
+    check_query.update({'custom_url': custom_url})
+    db.commit()
+
+    return check_query.first()
 
 
+@shorten_url_router.put("/update/{short_url}")
+def update_shorten_url(short_url: str, request: UpdateShortenUrl, db:Session=  Depends(get_db), 
+            current_user:Session=Depends(get_current_user)):
+    
+    check_query = db.query(models.ShortenUrl).filter(
+        models.ShortenUrl.short_url == short_url)
+    
+    if not check_query.first():
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, 
+                            detail="URL does not exist")
+    
+    if current_user.email != check_query.first().user:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, 
+                            detail="Unauthorized to perform this operation")
+        
+    check_query.update(request.dict())
+    db.commit()
 
-@shorten_url_router.get("/search")
-def search_shorten_url():
-    return  "Endpoint for searching for a particular shorten_url"
+    return check_query.first()
 
 
-
-@shorten_url_router.put("/update")
-def update_shorten_url():
-    return  "Endpoint for updating a shorten_url"
-
-
-@shorten_url_router.delete("/delete")
-def delete_content():
-    return  "Endpoint for deleting a  content"
+@shorten_url_router.delete("/delete/{short_url}")
+def delete_content(url:str, db:Session=  Depends(get_db), 
+                current_user:Session=Depends(get_current_user)):
+    
+    
+    check_query = db.query(models.ShortenUrl).filter(
+        models.ShortenUrl.short_url == url).first()
+    
+    if not check_query:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, 
+                            detail="URL does not exist")
+        
+    if current_user.email != check_query.user:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, 
+                            detail="Unauthorized to perform this operation")
+        
+    db.delete(check_query)
+    db.commit()
+    
+    return  JSONResponse(status_code=204, content="No content")
