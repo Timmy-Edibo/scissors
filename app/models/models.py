@@ -14,7 +14,7 @@ class User(Base):
     phone_number =Column(String(20))
     address = Column(String(50))
     profile_photo = Column(String)
-    is_active = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
     time_created = Column(DateTime, server_default=func.now())
     
     short_url = relationship("ShortenUrl", back_populates = "user_table")

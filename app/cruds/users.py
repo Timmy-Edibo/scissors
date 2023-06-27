@@ -189,9 +189,9 @@ def login(user_credentials: OAuth2PasswordRequestForm = Depends(),
     user = db.query(models.User).filter(
         models.User.email == user_credentials.username).first()
     
-    if user.is_active == False:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, 
-                            detail="This account is not active")
+    # if user.is_active == False:
+    #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, 
+    #                         detail="This account is not active")
 
     if not user:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid Credentials")
