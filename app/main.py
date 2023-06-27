@@ -5,6 +5,7 @@ from app.database.db import engine
 from app.routers import users
 from app.routers import shorten_url
 from fastapi.responses import RedirectResponse
+from sqlalchemy import or_
 
 
 app = FastAPI(title="Scissors App",
@@ -44,7 +45,8 @@ def main():
 def redirect_url(short_url: str, db:Session=  Depends(get_db)):
     
     check_query = db.query(models.ShortenUrl).filter(
-        models.ShortenUrl.short_url == short_url).first()
+        or_(models.ShortenUrl.short_url == short_url, models.ShortenUrl.custom_url == short_url)
+        ).first()
     
     if not check_query:
         raise HTTPException(status_code=404, detail="URL not found")
