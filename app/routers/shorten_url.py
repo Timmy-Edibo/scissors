@@ -52,7 +52,7 @@ def list_shorten_url(db:Session=  Depends(get_db),
     query = db.query(models.ShortenUrl).all()
     return query if len(query) > 0 else []
 
-@shorten_url_router.get("/list-all")
+@shorten_url_router.get("/list-loggedin-user-url")
 def list_loggedin_user_shorten_urls(db:Session=  Depends(get_db), 
                     current_user:Session=Depends(get_current_user)):
     
