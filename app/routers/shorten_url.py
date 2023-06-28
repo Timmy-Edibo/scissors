@@ -52,7 +52,13 @@ def list_shorten_url(db:Session=  Depends(get_db),
     query = db.query(models.ShortenUrl).all()
     return query if len(query) > 0 else []
 
-
+@shorten_url_router.get("/list-all")
+def list_loggedin_user_shorten_urls(db:Session=  Depends(get_db), 
+                    current_user:Session=Depends(get_current_user)):
+    
+    query = db.query(models.ShortenUrl).filter(
+      models.ShortenUrl.user==current_user.email).all()
+    return query if len(query) > 0 else []
 
 @shorten_url_router.get("/search/{short_url}")
 def search_shorten_url(short_url: str, custom_url:str, db:Session=  Depends(get_db), 
