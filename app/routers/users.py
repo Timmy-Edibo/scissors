@@ -96,8 +96,8 @@ def delete_all_user(db:Session=  Depends(get_db),
     
     return users.delete_all_user(db)
 
-@user_router.delete("/me")
-def delete_all_user(db:Session=  Depends(get_db),
+@user_router.get("/me")
+def current_loggedin_user(db:Session=  Depends(get_db),
                     current_user:Session=Depends(get_current_user)):
     
     return current_user
